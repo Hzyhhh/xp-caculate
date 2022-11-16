@@ -1,0 +1,9 @@
+{
+  "miniprogramRoot": "./",
+  "projectname": "xp-caculate",
+  "appid": "touristappid",
+  "setting": {
+    "es6": false,
+    "minified": false
+  }
+}
