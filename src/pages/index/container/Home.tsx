@@ -1,5 +1,5 @@
 import { Box } from "native-base";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { BottomBar } from "@/src/components";
 import type { BottomBarTabType } from "@/src/components/BottomBar";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -38,10 +38,9 @@ const tabs: BottomBarTabType[] = [
 
 const Home = (props: HomeProps) => {
   const [selected, setSelected] = useState(0);
-  const _page = useRef<PagerView>(null);
 
   const handleScroll = (page: PagerViewOnPageSelectedEvent) => {
-    console.log("page", page);
+    setSelected(page.nativeEvent.position);
   };
 
   return (
