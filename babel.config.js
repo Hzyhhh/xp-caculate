@@ -1,16 +1,6 @@
 // babel-preset-taro 更多选项和默认值：
 // https://github.com/NervJS/taro/blob/next/packages/babel-preset-taro/README.md
 
-const moduleResolver = [
-  require.resolve("babel-plugin-module-resolver"),
-  {
-    root: ["./"],
-    alias: {
-      "@src": "./src",
-    },
-  },
-];
-
 module.exports = {
   presets: [
     [
@@ -21,5 +11,5 @@ module.exports = {
       },
     ],
   ],
-  plugins: ["react-native-reanimated/plugin", moduleResolver],
+  plugins: ["react-native-reanimated/plugin"],
 };
