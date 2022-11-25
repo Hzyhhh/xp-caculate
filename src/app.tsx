@@ -1,16 +1,15 @@
-import { Component, PropsWithChildren } from "react";
+import { NativeBaseProvider } from "native-base";
+import { PropsWithChildren } from "react";
+import theme from "@src/theme";
+
 import "./app.less";
 
-class App extends Component<PropsWithChildren> {
-  componentDidMount() {}
+/**
+ * 这里做一些全局注入
+ */
 
-  componentDidShow() {}
-
-  componentDidHide() {}
-
-  // this.props.children 是将要会渲染的页面
-  render() {
-    return this.props.children
-  }
-}
-export default App;
+export default (props: PropsWithChildren) => {
+  return (
+    <NativeBaseProvider theme={theme}>{props.children}</NativeBaseProvider>
+  );
+};

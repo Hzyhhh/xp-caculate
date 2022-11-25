@@ -1,9 +1,9 @@
 import { useRouter } from "@tarojs/taro";
 import { FC, PropsWithChildren } from "react";
 import { Box, Center, Text } from "native-base";
-import "./index.less";
+import "../index.less";
 
-export const Index: FC<PropsWithChildren> = (props) => {
+export const Mine: FC<PropsWithChildren> = (props) => {
   const route = useRouter();
   const params = route.params;
 
@@ -25,4 +25,4 @@ export const Index: FC<PropsWithChildren> = (props) => {
   );
 };
 
-export default Index;
+export default Mine;
