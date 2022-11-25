@@ -1,6 +1,6 @@
 import { NativeBaseProvider } from "native-base";
 import { PropsWithChildren } from "react";
-import theme from "@src/theme";
+import theme from "@/src/theme";
 
 import "./app.less";
 

@@ -1,3 +1,4 @@
+const path = require('path')
 const config = {
   projectName: "xp-caculate",
   date: "2022-11-11",
