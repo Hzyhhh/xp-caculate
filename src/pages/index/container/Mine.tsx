@@ -15,7 +15,7 @@ export const Mine: FC<PropsWithChildren> = (props) => {
 
   return (
     <Center>
-      <Box flex={1}>
+      <Box>
         <Text onPress={handlePress}>
           Hello world12!
           {params?.a}
