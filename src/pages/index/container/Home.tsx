@@ -1,4 +1,4 @@
-import { Box, Column } from "native-base";
+import { Box, Column, ScrollView } from "native-base";
 import { useRef, useState } from "react";
 import { BottomBar } from "@/src/components";
 import type { BottomBarTabType } from "@/src/components/BottomBar";
@@ -59,11 +59,13 @@ const Home = (props: HomeProps) => {
       width="100%"
     >
       <Column flex={1}>
-        <PagerView ref={_page} initialPage={1} onPageSelected={handleScroll}>
-          <SearchPage key="search" />
-          <Caculate key="home" />
-          <Mine key="mine" />
-        </PagerView>
+        <ScrollView>
+          <PagerView ref={_page} initialPage={1} onPageSelected={handleScroll}>
+            <SearchPage key="search" />
+            <Caculate key="home" />
+            <Mine key="mine" />
+          </PagerView>
+        </ScrollView>
       </Column>
 
       {/* 底部栏 */}

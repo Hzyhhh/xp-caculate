@@ -23,4 +23,8 @@ export const zhConfigs = {
     "11月",
     "12月",
   ],
+  hour: "课时小时",
+  minute: "课时分钟",
+  timeSelect: "确定时长",
+  timeClose: "取消",
 };
