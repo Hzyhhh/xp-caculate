@@ -5,7 +5,6 @@ import { zhConfigs } from "@/src/utils";
 import {
   Text,
   Box,
-  AddIcon,
   CheckIcon,
   Column,
   FormControl,
@@ -16,22 +15,53 @@ import {
   Row,
   Select,
   WarningOutlineIcon,
-  Center,
   Modal,
+  Popover,
   Button,
+  Center,
 } from "native-base";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import shortId from "shortid";
 
 interface CaculateProps {}
+
+interface ClassListType {
+  id: string;
+  date: string;
+  classTime: number;
+}
 
 const Caculate = (props: CaculateProps) => {
   const [selectedDate, setSelectedDate] = useState(getFormatedDate(new Date()));
   const [classTime, setClassTime] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showPopover, setShowPopover] = useState(false);
+  const [classList, setClassList] = useState<ClassListType[]>([]);
 
   const handlePress = () => {
-    // Modal;
+    setShowPopover(true);
+  };
+
+  const handleSelectDate = (dateString: string) => {
+    setShowPopover(false);
+    setSelectedDate(dateString);
     setShowModal(true);
+  };
+
+  const handleTimeChange = (timeString: string) => {
+    setShowModal(false);
+
+    const [hour, min] = timeString.split(":");
+    const timeList = [Number(hour), Number(min) / 60];
+
+    const target = {
+      id: shortId.generate(),
+      date: selectedDate,
+      classTime: timeList.reduce((prev, cur) => prev + cur, 0),
+    };
+    console.log("target", target);
+
+    setClassList((plist) => plist.concat(target));
   };
 
   return (
@@ -73,7 +103,7 @@ const Caculate = (props: CaculateProps) => {
           <FormControl.Label>名字</FormControl.Label>
           <Input variant="underlined" placeholder="学生姓名 / 昵称" />
           <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-            ⬆️小胖你要填小朋友的名称。例如: 塔子、曼曼
+            ⬆️你要填小朋友的名称。例如: 塔子、曼曼
           </FormControl.ErrorMessage>
         </FormControl>
 
@@ -100,119 +130,112 @@ const Caculate = (props: CaculateProps) => {
           </FormControl.ErrorMessage>
         </FormControl>
 
-        <FormControl isInvalid w="80%">
+        <FormControl isInvalid>
           <Row justifyContent="space-between" alignItems="center">
             <FormControl.Label>上课记录</FormControl.Label>
-            <Pressable onPress={handlePress}>
-              {({ isPressed }) => (
-                <Box
-                  borderRadius={6}
-                  backgroundColor={isPressed ? "info.300" : "info.500"}
-                  py="0.8"
-                  px="2"
-                  style={{ transform: [{ scale: isPressed ? 0.99 : 1 }] }}
-                >
-                  <Row justifyContent="space-around" alignItems="center">
-                    <Icon
-                      as={MaterialIcons}
-                      color="light.50"
-                      name="add"
-                      size="4"
-                    />
-                    <Text letterSpacing={0.5} color="light.50" fontSize={12}>
-                      添加新的上课记录
-                    </Text>
+            <Popover
+              isOpen={showPopover}
+              onClose={() => setShowPopover(false)}
+              trigger={(triggerProps) => {
+                return (
+                  <Pressable {...triggerProps} onPress={handlePress}>
+                    {({ isPressed }) => (
+                      <Box
+                        borderRadius={6}
+                        backgroundColor={isPressed ? "info.300" : "info.500"}
+                        py="0.8"
+                        px="2"
+                        style={{ transform: [{ scale: isPressed ? 0.99 : 1 }] }}
+                      >
+                        <Row justifyContent="space-around" alignItems="center">
+                          <Icon
+                            as={MaterialIcons}
+                            color="light.50"
+                            name="add"
+                            size="4"
+                          />
+                          <Text
+                            letterSpacing={0.5}
+                            color="light.50"
+                            fontSize={12}
+                          >
+                            添加新的上课记录
+                          </Text>
 
-                    <Icon
-                      as={MaterialIcons}
-                      color="light.50"
-                      name="chevron-right"
-                      size="4"
-                    />
-                  </Row>
-                </Box>
-              )}
-            </Pressable>
+                          <Icon
+                            as={MaterialIcons}
+                            color="light.50"
+                            name="chevron-right"
+                            size="4"
+                          />
+                        </Row>
+                      </Box>
+                    )}
+                  </Pressable>
+                );
+              }}
+            >
+              <Popover.Content w="56">
+                <Popover.Arrow />
+                <DatePicker
+                  mode="calendar"
+                  configs={zhConfigs}
+                  current={selectedDate}
+                  selected={selectedDate}
+                  // onSelectedChange={handleSelectDate}
+                  onDateChange={handleSelectDate}
+                />
+              </Popover.Content>
+            </Popover>
           </Row>
+        </FormControl>
 
-          <Select
-            // selectedValue={classTime}
-            minWidth="200"
-            // accessibilityLabel="Choose Service"
-            placeholder="请选择"
-            _selectedItem={{
-              bg: "teal.100",
-              endIcon: <CheckIcon size="5" />,
-            }}
-            mt={1}
-            dropdownIcon={<></>}
-            isDisabled
-            onOpen={(nativeEvent) => {
-              console.log(123, nativeEvent);
-            }}
-            // onValueChange={setClassTime}
-          />
-          <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-            请设置单节课时长
-          </FormControl.ErrorMessage>
+        <FormControl>
+          {classList.map((i) => (
+            <Row key={i.id} justifyContent="space-between" alignItems="center">
+              <Row width="80%" justifyContent="space-between">
+                <FormControl.Label>{i.date}</FormControl.Label>
+                <FormControl.Label>{i.classTime}课时</FormControl.Label>
+              </Row>
+              <Pressable>
+                {({ isPressed }) => {
+                  return (
+                    <Box
+                      hitSlop={{ right: 10, left: 10 }}
+                      px="1.4"
+                      borderRadius="50"
+                      borderWidth="0.5"
+                      borderColor="danger.500"
+                    >
+                      <Icon
+                        as={MaterialIcons}
+                        color="danger.500"
+                        name="close"
+                        size={isPressed ? "4" : "5"}
+                      />
+                    </Box>
+                  );
+                }}
+              </Pressable>
+            </Row>
+          ))}
         </FormControl>
       </Box>
-      <Text>{selectedDate}</Text>
-
-      <DatePicker
-        mode="calendar"
-        configs={zhConfigs}
-        current={selectedDate}
-        selected={selectedDate}
-        onSelectedChange={setSelectedDate}
-      />
-
-      <DatePicker
-        mode="time"
-        // mode="calendar"
-        minuteInterval={30}
-        configs={zhConfigs}
-        // current={selectedDate}
-        // selected={selectedDate}
-        // onSelectedChange={setSelectedDate}
-      />
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
         <Modal.Content>
-          <Modal.CloseButton />
-
           <Modal.Header>增加记录</Modal.Header>
 
-          <Modal.Body>
-            <FormControl>
-              <FormControl.Label>Name</FormControl.Label>
-              <Input />
-            </FormControl>
-            <FormControl mt="3">
-              <FormControl.Label>Email</FormControl.Label>
-              <Input />
-            </FormControl>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button.Group space={2}>
-              <Button
-                variant="ghost"
-                colorScheme="blueGray"
-                onPress={() => {
-                  setShowModal(false);
-                }}
-              >
-                取消
-              </Button>
-              <Button
-                onPress={() => {
-                  setShowModal(false);
-                }}
-              >
-                确定
-              </Button>
-            </Button.Group>
-          </Modal.Footer>
+          <DatePicker
+            mode="time"
+            // mode="calendar"
+            minuteInterval={30}
+            configs={zhConfigs}
+            // current={selectedDate}
+            // selected={selectedDate}
+            // onSelectedChange={setSelectedDate}
+            onTimeChange={handleTimeChange}
+          />
         </Modal.Content>
       </Modal>
     </Column>
