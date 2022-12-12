@@ -1,4 +1,4 @@
-import { FC, forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 import DatePicker, { getFormatedDate } from "react-native-modern-datepicker";
 import { zhConfigs } from "@/src/utils";
@@ -18,12 +18,15 @@ import {
   Modal,
   Popover,
   Button,
-  IModalProps,
 } from "native-base";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import shortId from "shortid";
 import { createForm, WrappedFormMethods } from "rc-form";
-import { format, parseISO } from "date-fns";
+import {
+  TimePickerModal,
+  TimeRange,
+  TimePickerModalMethod,
+} from "@/src/components";
 
 interface CaculateProps {
   form: WrappedFormMethods;
@@ -34,6 +37,7 @@ interface ClassListType {
   date: string;
   classTime: number;
 }
+const date = new Date();
 
 const Caculate = (props: CaculateProps) => {
   const {
@@ -44,13 +48,13 @@ const Caculate = (props: CaculateProps) => {
       setFieldsValue: s,
     },
   } = props;
-  const [selectedDate, setSelectedDate] = useState(getFormatedDate(new Date()));
   const [showModal, setShowModal] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
   const [classList, setClassList] = useState<ClassListType[]>([]);
   const _timeModal = useRef<TimePickerModalMethod>(null);
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [selectedDate, setSelectedDate] = useState(getFormatedDate(date));
+  const [startTime, setStartTime] = useState("19:00");
+  const [endTime, setEndTime] = useState("20:30");
 
   const handlePress = () => {
     setShowPopover(true);
@@ -58,6 +62,8 @@ const Caculate = (props: CaculateProps) => {
 
   const handleSelectDate = (dateString: string) => {
     setShowPopover(false);
+    console.log("dateString", dateString);
+
     setSelectedDate(dateString);
     setShowModal(true);
   };
@@ -98,12 +104,30 @@ const Caculate = (props: CaculateProps) => {
 
   const handleEditTime = (type: "start" | "end") => {
     const renderType = {
-      start: () => _timeModal.current?.show({ type, title: "设置开始时间" }),
-      end: () => _timeModal.current?.show({ type, title: "设置结束时间" }),
+      start: () =>
+        _timeModal.current?.show({
+          type,
+          time: startTime,
+          title: "设置开始时间",
+        }),
+      end: () =>
+        _timeModal.current?.show({
+          type,
+          time: endDateTime,
+          title: "设置结束时间",
+        }),
     };
 
     return renderType[type]?.();
   };
+
+  const startDateTime = useMemo(() => {
+    return selectedDate + " " + startTime;
+  }, [selectedDate, startTime]);
+
+  const endDateTime = useMemo(() => {
+    return selectedDate + " " + endTime;
+  }, [endTime, selectedDate]);
 
   return (
     <Column space="3" px="6">
@@ -144,7 +168,7 @@ const Caculate = (props: CaculateProps) => {
           <FormControl.Label>优惠（打几折）</FormControl.Label>
           {f("discount")(
             <Input
-              value={g("discount")}
+              // value={g("discount")}
               variant="underlined"
               placeholder="这里输入优惠幅度"
               onChangeText={(disc) => s({ discount: disc })}
@@ -166,7 +190,7 @@ const Caculate = (props: CaculateProps) => {
           <FormControl.Label>名字</FormControl.Label>
           {f("name")(
             <Input
-              value={g("name")}
+              // value={g("name")}
               variant="underlined"
               placeholder="学生姓名 / 昵称"
               onChangeText={(n) => s({ name: n })}
@@ -185,7 +209,7 @@ const Caculate = (props: CaculateProps) => {
           <FormControl.Label>单价💰</FormControl.Label>
           {f("unitPrice")(
             <Input
-              value={g("unitPrice")}
+              // value={g("unitPrice")}
               InputLeftElement={
                 <Icon
                   as={<FontAwesome name="rmb" />}
@@ -308,6 +332,8 @@ const Caculate = (props: CaculateProps) => {
         </FormControl>
       </Box>
       <Button onPress={handleGenerator}>生成</Button>
+
+      {/* 弹窗 */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
         <Modal.Content>
           <Modal.Header>课程时长</Modal.Header>
@@ -323,9 +349,10 @@ const Caculate = (props: CaculateProps) => {
               </Row>
             </Box>
           </Modal.Header>
+
           <TimeRange
-            startTime={new Date()}
-            endTime={new Date()}
+            startTime={startDateTime}
+            endTime={endDateTime}
             onClickStartTime={() => handleEditTime("start")}
             onClickEndTime={() => handleEditTime("end")}
           />
@@ -359,87 +386,4 @@ export default createForm()(Caculate);
 
 const styles = StyleSheet.create({
   container: {},
-});
-
-interface TimeRangeprops {
-  startTime: Date;
-  endTime: Date;
-  onClickStartTime?: () => void;
-  onClickEndTime?: () => void;
-}
-
-export const TimeRange: FC<TimeRangeprops> = (props) => {
-  const {
-    startTime = new Date(),
-    endTime = new Date(),
-    onClickStartTime,
-    onClickEndTime,
-  } = props;
-  return (
-    <Box px="3" backgroundColor="info.100">
-      <Row alignItems="center" justifyContent="space-between">
-        <Button variant="ghost" size="sm" onPress={onClickStartTime}>
-          {format(startTime, "yyyy-MM-dd HH:mm")}
-        </Button>
-        <Text fontSize="xs">~</Text>
-        <Button variant="ghost" size="sm" onPress={onClickEndTime}>
-          {format(endTime, "yyyy-MM-dd HH:mm")}
-        </Button>
-      </Row>
-    </Box>
-  );
-};
-
-interface TimePickerModalProps extends IModalProps {
-  onTimeChange?: (dateString: string, type: "start" | "end") => void;
-}
-
-interface ModalOptionType {
-  title: string;
-  type: "start" | "end";
-}
-
-export interface TimePickerModalMethod {
-  show: (option?: ModalOptionType) => void;
-}
-
-type T = TimePickerModalProps;
-
-type P = TimePickerModalMethod;
-
-export const TimePickerModal = forwardRef<P, T>((props, ref) => {
-  const [visible, setVisible] = useState(false);
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState<"start" | "end">("start");
-
-  useImperativeHandle(ref, () => ({
-    show: (option: ModalOptionType) => {
-      setType(option.type);
-      setTitle(option.title);
-      setVisible(true);
-    },
-  }));
-
-  const handleTimeChange = (timeString: string) => {
-    setVisible(false);
-    props.onTimeChange?.(timeString, type);
-  };
-
-  return (
-    <Modal {...props} isOpen={visible} onClose={() => setVisible(false)}>
-      <Modal.Content>
-        {!!title && <Modal.Header>{title}</Modal.Header>}
-
-        <DatePicker
-          mode="time"
-          // mode="calendar"
-          minuteInterval={10}
-          configs={zhConfigs}
-          // current={selectedDate}
-          // selected={selectedDate}
-          onTimeChange={handleTimeChange}
-        />
-      </Modal.Content>
-    </Modal>
-  );
 });

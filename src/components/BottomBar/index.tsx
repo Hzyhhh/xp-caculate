@@ -1,4 +1,5 @@
 import { Text, Center, HStack, Icon, Pressable } from "native-base";
+import { FC } from "react";
 
 export interface BottomBarTabType {
   key: string;
@@ -14,7 +15,7 @@ interface BottomBarProps {
   onChangeTab: (tabIndex: number) => void;
 }
 
-const BottomBar = (props: BottomBarProps) => {
+const BottomBar: FC<BottomBarProps> = (props) => {
   const { tabs, currentTab, onChangeTab } = props;
 
   return (
