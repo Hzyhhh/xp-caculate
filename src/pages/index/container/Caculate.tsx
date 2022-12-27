@@ -18,6 +18,7 @@ import {
   Modal,
   Popover,
   Button,
+  Toast,
 } from "native-base";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import shortId from "shortid";
@@ -68,22 +69,6 @@ const Caculate = (props: CaculateProps) => {
     setShowModal(true);
   };
 
-  const handleTimeChange = (timeString: string) => {
-    setShowModal(false);
-
-    const [hour, min] = timeString.split(":");
-    const timeList = [Number(hour), Number(min) / 60];
-
-    const target = {
-      id: shortId.generate(),
-      date: selectedDate,
-      classTime: timeList.reduce((prev, cur) => prev + cur, 0),
-    };
-    console.log("target", target);
-
-    setClassList((plist) => plist.concat(target));
-  };
-
   const handleDeleteRecord = (id: string) => {
     setClassList((plist) => {
       plist = [...plist];
@@ -128,6 +113,32 @@ const Caculate = (props: CaculateProps) => {
   const endDateTime = useMemo(() => {
     return selectedDate + " " + endTime;
   }, [endTime, selectedDate]);
+
+  const handleConfirm = () => {
+    setShowModal(false);
+    let [startDate, splitStartTime] = startDateTime.split(" ");
+    let [endDate, splitEndTime] = endDateTime.split(" ");
+    function formatTime(t: string) {
+      const [hour, min] = t.split(":");
+      return Number(hour) + Number(Number(min) / 60);
+    }
+    const startTimeFormat = formatTime(splitStartTime);
+    const endTimeFormat = formatTime(splitEndTime);
+    let classTime = endTimeFormat - startTimeFormat;
+    // 这里做跨天的校验
+    if (startDate !== endDate) {
+      Toast.show({});
+    }
+
+    const target = {
+      id: shortId.generate(),
+      date: startDateTime + " ~ " + endDateTime,
+      classTime: classTime / g("classTime"),
+    };
+    console.log("target", target);
+
+    setClassList((plist) => plist.concat(target));
+  };
 
   return (
     <Column space="3" px="6">
@@ -359,7 +370,7 @@ const Caculate = (props: CaculateProps) => {
 
           <Modal.Footer py="1">
             <Button.Group>
-              <Button size="xs" onPress={() => {}}>
+              <Button size="xs" onPress={handleConfirm}>
                 确定时长
               </Button>
             </Button.Group>

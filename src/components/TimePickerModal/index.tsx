@@ -26,7 +26,7 @@ export const TimePickerModal = forwardRef<P, T>((props, ref) => {
   const [visible, setVisible] = useState(false);
   const [title, setTitle] = useState("");
   const [type, setType] = useState<"start" | "end">("start");
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState<string>();
 
   useImperativeHandle(ref, () => ({
     show: (option: ModalOptionType) => {
